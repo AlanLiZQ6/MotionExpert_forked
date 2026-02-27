@@ -193,7 +193,7 @@ Step 3 : Put the pretrained checkpoint file (for example : checkpoint_epoch_0000
 
 Run the following command from the MotionExpert directory.
 ```bash
-$ wget -O ./results/skating_gt/pretrain_checkpoints/best_pretrained_weight.pth 'https://www.dropbox.com/scl/fi/gnkhtz0h6mnhftxpo4cgb/checkpoint_epoch_00009.pth?rlkey=jheub4udl83ppobv53ibufnkq&st=n3amwn1r&dl=1'
+$ gdown 1oDwh8wWRokey6Payds3YdL3IHcCv5lUF -O ./results/skating_gt/pretrain_checkpoints/best_pretrained_weight.pth
 ```
 
 Step 4 : Place the `config.yaml` file in the `finetune` directory. For example, the config file `./results/skating_gt/skating_gt.yaml` should be placed in the `./results/skating_gt/` directory.
