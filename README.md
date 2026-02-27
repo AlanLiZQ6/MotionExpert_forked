@@ -185,20 +185,25 @@ Motion Expert
 - For developers: If you want to restart the entire training process from scratch, you must delete the entire `pretrain_checkpoints` directory. Otherwise, training will resume from the last saved epoch.
 
 ### Finetuning
-Step 1 : create the `finetune` directory.
+Step 1 : create the `skating_gt` directory.
 
-Step 2 : create the `pretrain_checkpoints` directory.
+Step 2 : create the `pretrain_checkpoints` directory within `skating_gt` directory.
 
-Step 3 : Put the pretrained checkpoint file (for example : checkpoint_epoch_00008.pth) in `pretrain_checkpoints` directory.
+Step 3 : Put the pretrained checkpoint file (for example : `checkpoint_epoch_00012.pth`) in `pretrain_checkpoints` directory.
 
-Run the following command from the MotionExpert directory.
+Run the following command within the `./MotionExpert` directory.
 ```bash
 $ gdown 1oDwh8wWRokey6Payds3YdL3IHcCv5lUF -O ./results/skating_gt/pretrain_checkpoints/best_pretrained_weight.pth
 ```
+Or run the following command within the `./MotionExpert` directory.
+```bash
+$ gdown 1oDwh8wWRokey6Payds3YdL3IHcCv5lUF -O ./results/pretrain_ref/pretrain_checkpoints/checkpoint_epoch_00012.pth
+```
+This can be adjusted depending on the variable `WEIGHT_PATH` of the `config.yaml` file (ex, `./MotionExpert/results/skating_gt/skating_gt.yaml`).
 
 Step 4 : Place the `config.yaml` file in the `finetune` directory. For example, the config file `./results/skating_gt/skating_gt.yaml` should be placed in the `./results/skating_gt/` directory.
 
-Step 5 : Run the following command from the MotionExpert directory.
+Step 5 : Run the following command within the `./MotionExpert` directory.
 ```bash
 $ python -m torch.distributed.run --nproc_per_node=1 --master_port=29051 main.py --cfg_file ./results/skating_gt/skating_gt.yaml > output/skating_gt
 ```
