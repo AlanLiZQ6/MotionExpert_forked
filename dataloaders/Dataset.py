@@ -7,6 +7,9 @@ bonelink = [(0, 1), (0, 2), (0, 3), (1, 4), (2, 5), (3, 6), (4, 7), (5, 8), (6, 
 
 def get_coords(joint_coords) :
     # Initialize the coordinates (x, y, z) for 22 joints and 22 bones.
+    # Handle both (T, 66) flattened and (T, 22, 3) shaped input.
+    if joint_coords.ndim == 3 :
+        joint_coords = joint_coords.reshape(len(joint_coords), -1)
     joint = np.zeros((3, len(joint_coords), 22))
     bone = np.zeros((3, len(joint_coords), 22))
     for i in range(len(joint_coords)) :
@@ -44,6 +47,10 @@ def get_std_coords(sport, motion_type, std_coords_list) :
             for std in std_coords_list :
                 if (std["video_name"] == "Jab"):
                     return std["coordinates"]
+    elif sport == 'Tennis' :
+        for std in std_coords_list :
+            if std["video_name"] == "foreflat" :
+                return std["coordinates"]
 
 def get_label(pretrain, labels, augmented_labels) :
     if not pretrain and augmented_labels != None:

@@ -37,4 +37,16 @@ output_pretrainSTAGCN_difference
 
 BaseLine
 results/finetune*
+results/*/checkpoints/
+results/*/checkpoints_backup/
+results/*/pretrain_checkpoints/
+results/*/train_logs/
+results/*/jsons/
+results/*/HTML/
+results/*/*.log
+results/*/*.pth
+VideoAlignment/result/*/checkpoints/
+VideoAlignment/result/*/train_logs/
+VideoAlignment/result/*/*.log
+output/
 generate_boxing_gt.py
