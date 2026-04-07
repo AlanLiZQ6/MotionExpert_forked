@@ -31,7 +31,7 @@ def load_checkpoint(cfg, model, optimizer, name = None) :
     if (not cfg.TASK.PRETRAIN) :
         # Find pretrain path.
         pretrain_path = cfg.WEIGHT_PATH
-        pretrain_checkpoint = torch.load(pretrain_path)
+        pretrain_checkpoint = torch.load(weights_only=False, f=pretrain_path)
 
         # Load weights that were previously pre-trained.
         # pretrain_total_params = sum(v.numel() for v in pretrain_checkpoint["model_state"].values())
@@ -52,7 +52,7 @@ def load_checkpoint(cfg, model, optimizer, name = None) :
             checkpoint_path = natsorted(checkpoints)[-1]
             print("Continue training - CHECKPOINT PATH : ", checkpoint_path)
 
-            checkpoint = torch.load(os.path.join(checkpoint_dir, checkpoint_path))
+            checkpoint = torch.load(weights_only=False, f=os.path.join(checkpoint_dir, checkpoint_path))
             base_name = os.path.basename(checkpoint_path)
             checkpoint_num = int(re.search(r'\d+', base_name).group())
             # Load weights that were previously fine-tuned.
@@ -64,7 +64,7 @@ def load_checkpoint(cfg, model, optimizer, name = None) :
             checkpoint_path = cfg.EVAL.ckpt
             dist.barrier()
             print("checkpoint_path", checkpoint_path)
-            checkpoint = torch.load(checkpoint_path)
+            checkpoint = torch.load(weights_only=False, f=checkpoint_path)
             base_name = os.path.basename(checkpoint_path)
             try:
                 checkpoint_num = int(re.search(r'\d+', base_name).group())
@@ -116,7 +116,7 @@ def load_alignment_checkpoint(cfg, align_module) :
     checkpoint_dir = os.path.join(cfg.alignment_cfg.LOGDIR, "checkpoints")
     checkpoints = os.listdir(checkpoint_dir)
     checkpoint_path = natsorted(checkpoints)[-1]
-    checkpoint = torch.load(os.path.join(checkpoint_dir, checkpoint_path))
+    checkpoint = torch.load(weights_only=False, f=os.path.join(checkpoint_dir, checkpoint_path))
     print("LOADING ALIGNMENT CHECKPOINT AT : ", checkpoint_path)
 
     newckpt = {'model_state' : {}}

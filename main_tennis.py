@@ -233,7 +233,7 @@ def main():
     start_epoch = load_checkpoint(cfg, model, optimizer)
     model = model.to(torch.float32)
 
-    eval_cycle = 1
+    eval_cycle = getattr(cfg, 'EVAL_CYCLE', 5)
 
     if dist.get_rank() == 0:
         print(f"\n{'='*60}")

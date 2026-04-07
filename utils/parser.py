@@ -15,9 +15,7 @@ def to_dict(config):
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    localrank = '--local_rank'
-    if torch.__version__ == '2.2.2':
-        localrank = '--local-rank'
+    localrank = '--local-rank'
 
     parser.add_argument(localrank, default=0, type=int, help='rank in local processes')
     parser.add_argument('--cfg_file' , type=str, help='absolute path to the config.yaml')

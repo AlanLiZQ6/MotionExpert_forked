@@ -20,9 +20,10 @@ DATA :
 
 OPTIMIZER :
     LR : 1e-4
-    MAX_EPOCH : 64
+    MAX_EPOCH : 200
     WARMUP_STEPS : 5000
 
+EVAL_CYCLE : 5
 LOGDIR : "./results/tennis_aligned"
 LOSS : "PerGT"
 DEBUG : False
