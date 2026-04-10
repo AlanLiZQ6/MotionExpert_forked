@@ -49,7 +49,7 @@ def get_std_coords(sport, motion_type, std_coords_list) :
                     return std["coordinates"]
     elif sport == 'Tennis' :
         for std in std_coords_list :
-            if std["video_name"] == "foreflat" :
+            if std["video_name"] == motion_type :
                 return std["coordinates"]
 
 def get_label(pretrain, labels, augmented_labels) :
