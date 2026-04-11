@@ -16,6 +16,7 @@ class CoachMe(nn.Module) :
         self.hpp_way = cfg.TASK.HPP_WAY
         self.diff_type = cfg.TASK.DIFF_TYPE
         self.diff_way = cfg.TASK.DIFF_WAY
+        self.proj_strategy = cfg.TASK.PROJ_STRATEGY
 
         # LoRA config.
         if self.pretrain :
@@ -117,6 +118,11 @@ class CoachMe(nn.Module) :
             tokens, max_indices = self.get_proj_feat(motion_tokens, None, self.ref, self.diff_type)
         tokens = tokens.float()
 
+        # For ATTENTION_POOL, tokens shape is [B, T, 768] — need mask of length T.
+        if self.proj_strategy == 'ATTENTION_POOL' :
+            frame_mask = torch.ones(tokens.shape[0], tokens.shape[1],
+                                    device=tokens.device, dtype=tokens.dtype)
+
         return self.LanguageModel(inputs_embeds = tokens.contiguous(),
                                   attention_mask = frame_mask,
                                   decoder_input_ids = decoder_input_ids,
@@ -157,6 +163,11 @@ class CoachMe(nn.Module) :
                 tokens, max_indices = self.get_proj_feat(motion_tokens, None, self.ref, self.diff_type)
             tokens = tokens.float()
 
+            # For ATTENTION_POOL, tokens shape is [B, T, 768] — need mask of length T.
+            if self.proj_strategy == 'ATTENTION_POOL' :
+                frame_mask = torch.ones(tokens.shape[0], tokens.shape[1],
+                                        device=tokens.device, dtype=tokens.dtype)
+
         dosample = False
         # Set do_sample as True for demo.
         if self.cfg.EVAL.ckpt != "None" :
@@ -175,8 +186,8 @@ class CoachMe(nn.Module) :
                                                     temperature = 2.0,
                                                     do_sample = dosample,
                                                     early_stopping = True)
-        # Distributed Training.
-        if not self.pretrain and dist.get_rank() == 0 :
+        # Distributed Training. Skip HTML visualization for ATTENTION_POOL (encoder tokens != 22 joints).
+        if not self.pretrain and dist.get_rank() == 0 and self.proj_strategy != 'ATTENTION_POOL' :
             decoded_text = tokenizer.convert_ids_to_tokens(generated_ids.sequences[0])
             out = self.LanguageModel(inputs_embeds = tokens[0].unsqueeze(0),
                                      decoder_input_ids = generated_ids.sequences[0].unsqueeze(0),

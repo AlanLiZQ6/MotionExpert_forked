@@ -1,0 +1,37 @@
+# Low LR (3e-5) + warmup 5000 + UNFREEZE projection base weights
+# Previous lowlr experiment peaked at epoch 10-15 (Unique=338) then collapsed.
+# Unfreezing projection gives more capacity — may maintain diversity longer.
+#
+# python -m torch.distributed.run --nproc_per_node=1 --master_port=29050 main_tennis.py --cfg_file ./results/tennis_aug_lowlr_unfrozen/tennis_aug_lowlr_unfrozen.yaml
+
+TASK :
+    PRETRAIN : False
+    SPORT : "Tennis"
+    HPP_WAY : "HPP"
+    REF : True
+    DIFF_WAY : "Subtraction"
+    DIFF_TYPE : "Skeleton"
+    PROJ_STRATEGY : "ATTENTION_POOL"
+    UNFREEZE_PROJECTION : True
+
+STANDARD_PATH : "/workspace/dataset/pkl_output_smpl22/tennis_standard.pkl"
+WEIGHT_PATH : "./results/pretrain_ref/pretrain_checkpoints/checkpoint_epoch_00012.pth"
+
+DATA :
+    TRAIN : "/workspace/dataset/pkl_output_smpl22/tennis_train.pkl"
+    TEST : "/workspace/dataset/pkl_output_smpl22/tennis_test.pkl"
+    BATCH_SIZE : 4
+
+OPTIMIZER :
+    LR : 3e-5
+    MAX_EPOCH : 200
+    WARMUP_STEPS : 5000
+
+EVAL_CYCLE : 5
+LOGDIR : "./results/tennis_aug_lowlr_unfrozen"
+LOSS : "RandomGT"
+DEBUG : False
+SETTING: "ALIGNED"
+EVAL :
+    score : True
+    ckpt : "None"

@@ -52,8 +52,10 @@ def get_std_coords(sport, motion_type, std_coords_list) :
             if std["video_name"] == motion_type :
                 return std["coordinates"]
 
-def get_label(pretrain, labels, augmented_labels) :
-    if not pretrain and augmented_labels != None:
+def get_label(pretrain, labels, augmented_labels, single_label=False) :
+    if single_label :
+        labels = [labels[0]]
+    elif not pretrain and augmented_labels != None:
         labels = labels + augmented_labels
 
     newlabels = ["Motion Description : " + label if pretrain else "Motion Instruction : " + label for label in labels]
@@ -88,6 +90,7 @@ class DatasetLoader(Dataset) :
 
         self.samples = []
         index_dict = {}
+        single_label = getattr(cfg.TASK, 'SINGLE_LABEL', False)
 
         if not pretrain and cfg.TASK.REF == True :
             standard_path = cfg.STANDARD_PATH
@@ -119,9 +122,9 @@ class DatasetLoader(Dataset) :
                 if not cfg.EVAL.score:
                     labels = None
                 elif pretrain == True :
-                    labels = get_label(pretrain, item['labels'], None)
+                    labels = get_label(pretrain, item['labels'], None, single_label=single_label)
                 else :
-                    labels = get_label(pretrain, item['labels'], item['augmented_labels'])
+                    labels = get_label(pretrain, item['labels'], item['augmented_labels'], single_label=single_label)
                 # Use the whole sequence without segmentation.
                 usr_start, length = 0, skeleton_coords.shape[1]
                 subtraction = torch.empty(0)
@@ -132,7 +135,7 @@ class DatasetLoader(Dataset) :
                 if not cfg.EVAL.score :
                     labels = None
                 else :
-                    labels = get_label(pretrain, item['labels'], item['augmented_labels'])
+                    labels = get_label(pretrain, item['labels'], item['augmented_labels'], single_label=single_label)
 
                 # Specify the segment.
                 if self.cfg.TASK.DIFF_TYPE == 'RGB' :

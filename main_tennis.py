@@ -233,6 +233,26 @@ def main():
     start_epoch = load_checkpoint(cfg, model, optimizer)
     model = model.to(torch.float32)
 
+    # Optionally unfreeze Projection base weights (frozen by default in lora.Linear).
+    if getattr(cfg.TASK, 'UNFREEZE_PROJECTION', False):
+        unfrozen_count = 0
+        for name, param in model.named_parameters():
+            if 'Projection' in name and not param.requires_grad:
+                param.requires_grad = True
+                unfrozen_count += 1
+        if dist.get_rank() == 0:
+            print(f"Unfroze {unfrozen_count} Projection parameters for full fine-tuning.")
+        # Rebuild optimizer to include newly unfrozen parameters.
+        optimizer = torch.optim.AdamW(
+            [p for p in model.parameters() if p.requires_grad],
+            lr=float(cfg.OPTIMIZER.LR)
+        )
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=cfg.OPTIMIZER.WARMUP_STEPS,
+            num_training_steps=cfg.OPTIMIZER.MAX_EPOCH * len(train_dataloader)
+        )
+
     eval_cycle = getattr(cfg, 'EVAL_CYCLE', 5)
 
     if dist.get_rank() == 0:

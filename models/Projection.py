@@ -1,3 +1,4 @@
+import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import loralib as lora
@@ -8,6 +9,15 @@ class Projection(nn.Module) :
         drop_rate = 0.1
         self.change_layer = []
         self.proj_strategy = proj_strategy
+
+        # Learnable attention pooling over joints (V dimension).
+        # Produces per-joint attention weights so important joints contribute more.
+        if proj_strategy == 'ATTENTION_POOL' :
+            self.joint_attn = nn.Sequential(
+                nn.Linear(in_channel, 128),
+                nn.Tanh(),
+                nn.Linear(128, 1)
+            )
 
         for _ in range(1) :
             self.change_layer.append(nn.Dropout(drop_rate))
@@ -68,6 +78,14 @@ class Projection(nn.Module) :
             # Convert node dimension to the third dimension so that pool2d operation can work.
             x, max_indices = F.max_pool2d(x, (x.size(2), 1), return_indices = True)
             x = x.squeeze(2)
+        elif self.proj_strategy == 'ATTENTION_POOL' :
+            # x: [B, T, V, C]
+            # Compute attention weights over joints (V) for each frame.
+            attn_scores = self.joint_attn(x)              # [B, T, V, 1]
+            attn_weights = F.softmax(attn_scores, dim=2)  # softmax over V
+            x = (x * attn_weights).sum(dim=2)             # [B, T, C] — weighted sum over joints
+            max_indices = None
+            # Keep all T frames — each frame becomes one token for T5.
 
         x = x.reshape(-1, C)
         x = self.change_layer(x)
