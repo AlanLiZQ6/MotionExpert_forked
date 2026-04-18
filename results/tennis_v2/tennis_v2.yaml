@@ -1,7 +1,6 @@
-# Attention Pool experiment — replace TIME_POOL max pooling with learnable attention.
-# This preserves per-frame tokens for T5 instead of collapsing all frames into one.
-#
-# python -m torch.distributed.run --nproc_per_node=1 --master_port=29050 main_tennis.py --cfg_file ./results/tennis_attn_pool/tennis_attn_pool.yaml > ./output/tennis_attn_pool
+# tennis_v2: paper-matched hyperparameters
+# LR=1e-4 (paper default), warmup 5000 steps, train longer
+# python -m torch.distributed.run --nproc_per_node=1 --master_port=29050 main_tennis.py --cfg_file ./results/tennis_v2/tennis_v2.yaml
 
 TASK :
     PRETRAIN : False
@@ -11,6 +10,7 @@ TASK :
     DIFF_WAY : "Subtraction"
     DIFF_TYPE : "Skeleton"
     PROJ_STRATEGY : "ATTENTION_POOL"
+    UNFREEZE_PROJECTION : True
 
 STANDARD_PATH : "/workspace/dataset/pkl_output_smpl22/tennis_standard.pkl"
 WEIGHT_PATH : "./results/pretrain_ref/pretrain_checkpoints/checkpoint_epoch_00012.pth"
@@ -26,10 +26,10 @@ OPTIMIZER :
     WARMUP_STEPS : 5000
 
 EVAL_CYCLE : 5
-LOGDIR : "./results/tennis_attn_pool"
-LOSS : "PerGT"
+LOGDIR : "./results/tennis_v2"
+LOSS : "RandomGT"
 DEBUG : False
 SETTING: "ALIGNED"
 EVAL :
     score : True
-    ckpt : "None"
+    ckpt : "/workspace/MotionExpert_forked/results/tennis_v2/checkpoints/checkpoint_epoch_00025.pth"

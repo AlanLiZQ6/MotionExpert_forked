@@ -95,8 +95,9 @@ def eval(cfg, eval_dataloader, model, epoch, summary_writer, sanity_check = Fals
                 att_node_results[name] = att_node.cpu().numpy().tolist()
             for name, att_graph in zip(video_name, att_graph) :
                 att_graph_results[name] = att_graph.cpu().numpy().tolist()
-            for name, max_index in zip(video_name, max_index) :
-                max_index_results[name] = max_index.cpu().numpy().tolist()
+            if max_index is not None :
+                for name, max_index in zip(video_name, max_index) :
+                    max_index_results[name] = max_index.cpu().numpy().tolist()
             if dist.get_rank() == 0 :
                 eval_dataloader.set_postfix({'loss' : np.mean(loss_list)})
 

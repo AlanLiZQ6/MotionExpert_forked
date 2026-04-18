@@ -168,11 +168,6 @@ class CoachMe(nn.Module) :
                 frame_mask = torch.ones(tokens.shape[0], tokens.shape[1],
                                         device=tokens.device, dtype=tokens.dtype)
 
-        dosample = False
-        # Set do_sample as True for demo.
-        if self.cfg.EVAL.ckpt != "None" :
-            dosample = True
-
         generated_ids = self.LanguageModel.generate(inputs_embeds = tokens,
                                                     attention_mask = frame_mask,
                                                     decoder_input_ids = decoder_input_ids,
@@ -182,9 +177,7 @@ class CoachMe(nn.Module) :
                                                     length_penalty = 3.0,
                                                     return_dict_in_generate = True,
                                                     output_attentions = True,
-                                                    # Set do_sample as True for demo.
-                                                    temperature = 2.0,
-                                                    do_sample = dosample,
+                                                    do_sample = False,
                                                     early_stopping = True)
         # Distributed Training. Skip HTML visualization for ATTENTION_POOL (encoder tokens != 22 joints).
         if not self.pretrain and dist.get_rank() == 0 and self.proj_strategy != 'ATTENTION_POOL' :

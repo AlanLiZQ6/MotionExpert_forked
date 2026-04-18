@@ -34,4 +34,4 @@ DEBUG : False
 SETTING: "ALIGNED"
 EVAL :
     score : True
-    ckpt : "None"
+    ckpt : "/workspace/MotionExpert_forked/results/tennis_aug_lowlr_unfrozen/checkpoint_epoch_00015.pth"

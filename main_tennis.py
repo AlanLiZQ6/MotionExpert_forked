@@ -38,9 +38,8 @@ def train(cfg, train_dataloader, model, optimizer, scheduler, summary_writer, ep
         optimizer.zero_grad()
 
         if cfg.LOSS == "RandomGT":
-            num_gt = len(labels_batch[0])
-            rand_idx = random.randint(0, num_gt - 1)
-            instructions = [labels_batch[i][rand_idx] for i in range(len(labels_batch))]
+            instructions = [labels_batch[i][random.randint(0, len(labels_batch[i]) - 1)]
+                            for i in range(len(labels_batch))]
         else:
             instructions = label_batch
 
