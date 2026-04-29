@@ -6,6 +6,8 @@ Evaluation Criteria:
 
 Consistency (1-5) - the factual alignment between the summary and the summarized source. A factually consistent rephrased version contains only statements that logically follow from the original instruction. 
 
+IMPORTANT — paraphrase tolerance:
+Two instructions are considered factually consistent if they target the same underlying motion fault and recommend a physically equivalent fix. Differences in vocabulary, sentence structure, or technical specificity should NOT lower the score, as long as the physical coaching intent is preserved.
 
 Evaluation Steps:
 

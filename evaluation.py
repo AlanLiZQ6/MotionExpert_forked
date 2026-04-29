@@ -160,7 +160,7 @@ def eval(cfg, eval_dataloader, model, epoch, summary_writer, sanity_check = Fals
             results["rouge"] = scores["rouge"]['rougeL']
             results["cider"] = scores["cider"]['score']
 
-            P, R, F1 = score(predictions, ground_truth, lang = "en", verbose = False, idf = True, rescale_with_baseline = True)
+            P, R, F1 = score(predictions, ground_truth, lang = "en", verbose = False, idf = False, rescale_with_baseline = False)
             results["bertscore"] = F1.mean().item()
             logger.info(f"Epoch {epoch} : Loss {np.mean(loss_list)}")
             for key in results :

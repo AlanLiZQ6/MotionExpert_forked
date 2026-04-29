@@ -3,8 +3,14 @@ os.environ['NUMEXPR_MAX_THREADS'] = '2'
 os.environ['TOKENIZERS_PARALLELISM'] = "false"
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
+# Silence HTTP request spam from huggingface_hub / httpx / urllib3.
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
+logging.getLogger("transformers").setLevel(logging.WARNING)
 
-from transformers import AutoTokenizer, get_linear_schedule_with_warmup
+from transformers import AutoTokenizer, get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup
 from utils.parser import parse_args, load_config
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
@@ -222,7 +228,8 @@ def main():
     test_dataloader = construct_dataloader('test', cfg, cfg.DATA.TEST)
 
     max_epoch = cfg.OPTIMIZER.MAX_EPOCH
-    scheduler = get_linear_schedule_with_warmup(
+    sched_fn = get_cosine_schedule_with_warmup if getattr(cfg.OPTIMIZER, 'SCHEDULER', 'linear').lower() == 'cosine' else get_linear_schedule_with_warmup
+    scheduler = sched_fn(
         optimizer,
         num_warmup_steps=cfg.OPTIMIZER.WARMUP_STEPS,
         num_training_steps=max_epoch * len(train_dataloader)
@@ -246,7 +253,7 @@ def main():
             [p for p in model.parameters() if p.requires_grad],
             lr=float(cfg.OPTIMIZER.LR)
         )
-        scheduler = get_linear_schedule_with_warmup(
+        scheduler = sched_fn(
             optimizer,
             num_warmup_steps=cfg.OPTIMIZER.WARMUP_STEPS,
             num_training_steps=cfg.OPTIMIZER.MAX_EPOCH * len(train_dataloader)

@@ -32,4 +32,4 @@ DEBUG : False
 SETTING: "ALIGNED"
 EVAL :
     score : True
-    ckpt : "/workspace/MotionExpert_forked/results/tennis_v2/checkpoints/checkpoint_epoch_00025.pth"
+    ckpt : "/workspace/MotionExpert_forked/results/tennis_v2/checkpoints/checkpoint_epoch_00015.pth"
