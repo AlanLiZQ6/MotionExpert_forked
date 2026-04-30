@@ -50,3 +50,5 @@ VideoAlignment/result/*/train_logs/
 VideoAlignment/result/*/*.log
 output/
 generate_boxing_gt.py
+
+!GEval/tennis_gt.json

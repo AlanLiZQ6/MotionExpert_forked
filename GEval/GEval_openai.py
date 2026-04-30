@@ -1,18 +1,24 @@
+# In this file, we will use the OpenAI API to do the evaluation process
+# The whole format use the /workspace/MotionExpert_forked/GEval/GEval_score_calculator.py from Coachme project to be the reference.
+# Citations:
+# CoachMe (MotionXperts/MotionExpert): https://github.com/MotionXperts/MotionExpert
+# OpenAI API: https://platform.openai.com/docs/api-reference
+
 import openai, json, argparse, tqdm, os, re
 from dotenv import load_dotenv
 
 def read_template(path):
     return open(path).read()
 
-def read_data(gt_path, pred_path):
-    gt = json.load(open(gt_path, encoding='utf-8'))
+def read_data(ground_truth_path, pred_path):
+    ground_truth = json.load(open(ground_truth_path, encoding='utf-8'))
     preds = json.load(open(pred_path, encoding='utf-8'))
     out = []
-    for k in gt:
-        out.append({"file_name": k, "source": gt[k], "system_output": preds.get(k, "")})
+    for k in ground_truth:
+        out.append({"file_name": k, "source": ground_truth[k], "system_output": preds.get(k, "")})
     return out
 
-def g_eval(client, samples, prompt_tpl, epoch, out_dir, model):
+def g_eval(model, samples, prompt_tpl, epoch, out_dir, model_name):
     records, ok, bad, total = [], 0, 0, 0
     for inst in tqdm.tqdm(samples, desc=f"epoch {epoch}"):
         src = inst['source']
@@ -24,8 +30,8 @@ def g_eval(client, samples, prompt_tpl, epoch, out_dir, model):
             continue
         cur = prompt_tpl.replace('{{Document}}', src).replace('{{Summary}}', sysout)
         try:
-            resp = client.chat.completions.create(
-                model=model,
+            resp = model.chat.completions.create(
+                model=model_name,
                 messages=[{"role": "user", "content": cur}],
                 max_tokens=5,
                 temperature=0,
@@ -60,20 +66,21 @@ if __name__ == '__main__':
     ap.add_argument('--model', default='gpt-4o')
     args = ap.parse_args()
 
+    # Set the API Key
     key = os.getenv("OPENAI_API_KEY")
     if not key:
-        raise SystemExit("OPENAI_API_KEY not set (add to .env or export it)")
-    client = openai.OpenAI(api_key=key)
+        raise SystemExit("You need to set the OPENAI_API_KEY at first.")
+    model = openai.OpenAI(api_key=key)
     tpl = read_template(args.prompt_fp)
 
+    
     summary = {}
     for e in args.epochs:
         pred_path = os.path.join(args.predict_dir, f'results_epoch{e}.json')
         if not os.path.exists(pred_path):
-            print(f"SKIP epoch {e}: {pred_path} missing")
             continue
         samples = read_data(args.ground_truth, pred_path)
-        avg, ok, bad = g_eval(client, samples, tpl, e, args.output, args.model)
+        avg, ok, bad = g_eval(model, samples, tpl, e, args.output, args.model)
         summary[f'epoch_{e}'] = {'avg_score': avg, 'scored': ok, 'skipped': bad, 'model': args.model}
         print(f"Epoch {e}: avg={avg:.3f} ({ok} scored, {bad} skipped)")
 
